@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AccountForm, TransactionForm
 from .models import Account, Transaction
 
+
 # This function will render the Home page when requested
 def home(request):
     form = TransactionForm(data=request.POST or None) # Retrieve Transaction form
@@ -11,7 +12,8 @@ def home(request):
         return balance(request, pk)  # call balanace function to render that account's Balance Sheet
     content = {'form': form}  # Pass content to the template in a dictionary
     # Adds content of form to page
-    return render(request, 'checkbook/index.html')
+    return render(request, 'checkbook/index.html', content)
+
 
 # This function will render the Create New Account page when requested
 def create_account(request):
@@ -25,8 +27,9 @@ def create_account(request):
     # adds content of form to page
     return render(request, 'checkbook/CreateNewAccount.html', content)
 
+
 # This function will render the Balance page when requested
-def balance(request):
+def balance(request, pk):
     account = get_object_or_404(Account, pk=pk) # Retrieve the requested account using its primary key
     transactions = Transaction.Transactions.filter(account=pk) # Retrieve all of that accounts transactions
     current_total = account.initial_deposit # Create account total variable, starting with initial deposit value
@@ -39,7 +42,9 @@ def balance(request):
             current_total -=  t.amount # If withdrawal substract amount from balance
             table_contents.update({t: current_total}) # Add transaction and total to the dictionary
     # Pass account, account total balance, and transaction information to the template
+    content = {'account': account, 'table_contents': table_contents, 'balance': current_total}
     return render(request, 'checkbook/BalanceSheet.html', content)
+
 
 # This function will render the Transaction page when requested
 def transaction(request):
@@ -53,4 +58,4 @@ def transaction(request):
     # Pass content to the template in a dictionary
     content = {'form': form}
     # Adds content fo form to page
-    return render(request, 'checkbook/AddTransaction.html')
+    return render(request, 'checkbook/AddTransaction.html', content)
